@@ -1,10 +1,21 @@
 import React from "react";
-import {  useGetAllData } from "./services/query/Alldata";
+import { useGetAllData } from "./services/query/Alldata";
 import { Spin, Table } from "antd";
+import { usePost } from "./services/mutation/usePost";
+import { useForm } from "react-hook-form";
 
 export const Phones = () => {
   const { data, isLoading } = useGetAllData("phones");
-
+  const { mutate } = usePost("phones");
+  const { register, reset, handleSubmit } = useForm();
+  const submit = (data) => {
+    mutate(data, {
+      onSuccess: (data) => {
+        console.log(data);
+        reset()
+      },
+    });
+  };
   const dataSource = data?.map((phone) => ({
     key: phone.id,
     img: (
@@ -41,6 +52,15 @@ export const Phones = () => {
   return isLoading ? (
     <Spin style={{ display: "flex", justifyContent: "center" }} size="large" />
   ) : (
-    <Table dataSource={dataSource} columns={columns} />
+    <div>
+      <form onSubmit={handleSubmit(submit)}>
+        <input {...register("img", { required: true })} type="text" />
+        <input {...register("title", { required: true })} type="text" />
+        <input {...register("price", { required: true })} type="number" />
+        <input {...register("count", { required: true })} type="number" />
+        <button>Submit</button>
+      </form>
+      <Table dataSource={dataSource} columns={columns} />
+    </div>
   );
 };
